@@ -1,0 +1,29 @@
+@extends('backend.insumos.layout')
+
+@section('content')
+
+<div class="card mt-5">
+  <h2 class="card-header">Edit Product</h2>
+  <div class="card-body">
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a class="btn btn-primary btn-sm" href="{{ route('insumos.index') }}"><i class="fa fa-arrow-left"></i> Volver</a>
+    </div>
+
+    <form action="{{ route('insumos.update', $insumo->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        <label for="nombre" class="form-label"><strong>Nombre:</strong></label>
+        <input type="text" name="nombre" class="form-control" value="{{ $insumo->nombre }}" required>
+        <label for="descripcion" class="form-label"><strong>Descripción:</strong></label>
+        <input type="text" name="descripcion" class="form-control" value="{{ $insumo->descripcion }}" required>
+        <label for="precio" class="form-label"><strong>Unidad de Medida:</strong></label>
+        <input type="number" name="precio" class="form-control" value="{{ $insumo->unidad_medida }}" required>
+        <label for="stock" class="form-label"><strong>Stock:</strong></label>
+        <input type="number" name="stock" class="form-control" value="{{ $insumo->stock }}" required>
+        <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Actualizar</button>
+    </form>
+
+  </div>
+</div>
+@endsection
