@@ -134,7 +134,7 @@
                 <div class="flex items-center space-x-3">
                     <div class="text-4xl">🍦</div>
                     <div>
-                        <h1 class="text-2xl font-bold">Helados Delicia</h1>
+                        <h1 class="text-2xl font-bold">Amai Gelato</h1>
                         <p class="text-sm opacity-90">La mejor heladería de la ciudad</p>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
     <!-- Hero Section -->
     <section class="ice-cream-bg py-16">
         <div class="container mx-auto px-4 text-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-4">¡Bienvenidos a Helados Delicia!</h2>
+            <h2 class="text-5xl font-bold text-gray-800 mb-4">¡Bienvenidos a Amai Gelato!</h2>
             <p class="text-xl text-gray-700 mb-8">Los helados más cremosos y deliciosos de la ciudad</p>
             <div class="flex justify-center space-x-8 text-6xl">
                 <span class="animate-bounce">🍨</span>
@@ -246,7 +246,7 @@
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-envelope text-blue-500 mr-3"></i>
-                                <span>info@heladosdelicia.com</span>
+                                <span>info@amaigelato.com</span>
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-map-marker-alt text-blue-500 mr-3"></i>
@@ -286,10 +286,10 @@
         <div class="container mx-auto px-4 text-center">
             <div class="flex justify-center items-center space-x-2 mb-4">
                 <span class="text-2xl">🍦</span>
-                <span class="text-xl font-bold">Helados Delicia</span>
+                <span class="text-xl font-bold">Amai Gelato</span>
             </div>
             <p class="text-gray-400 mb-4">Los mejores helados artesanales de la ciudad</p>
-            <p class="text-sm text-gray-500">&copy; 2024 Helados Delicia. Todos los derechos reservados.</p>
+            <p class="text-sm text-gray-500">&copy; 2025 Amai Gelato. Todos los derechos reservados.</p>
         </div>
     </footer>
 
