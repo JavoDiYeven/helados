@@ -1,5 +1,5 @@
-@extends('backend.insumos.layout')
-
+@extends('backend.layouts.app')
+@section('title', 'Admin - Crear Insumos')
 @section('content')
 
 <div class="card mt-5">

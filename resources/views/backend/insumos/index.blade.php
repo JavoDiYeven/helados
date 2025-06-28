@@ -1,4 +1,5 @@
-@extends('backend.insumos.layout')
+@extends('backend.layouts.app')
+@section('title', 'Admin Insumos')
 @section('content')
 <div class="card mt-5">
     <h2>Listado de insumos</h2>

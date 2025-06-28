@@ -1,4 +1,5 @@
-@extends('backend.productos.layout')
+@extends('backend.layouts.app')
+@section('title', 'Admin - Crear Productos')
 
 @section('content')
 

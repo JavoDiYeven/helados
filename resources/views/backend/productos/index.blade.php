@@ -1,4 +1,5 @@
-@extends('backend.productos.layout')
+@extends('backend.layouts.app')
+@section('title', 'Admin Productos')
 @section('content')
 <div class="card mt-5">
     <h2>Listado de productos</h2>

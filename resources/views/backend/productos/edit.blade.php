@@ -1,5 +1,5 @@
-@extends('backend.productos.layout')
-
+@extends('backend.layouts.app')
+@section('title', 'Admin - Editar Productos')
 @section('content')
 
 <div class="card mt-5">
