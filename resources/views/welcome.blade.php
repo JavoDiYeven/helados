@@ -1,21 +1,123 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang={{ app()->getLocale() }}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍦 Helados Delicia - La mejor heladería de la ciudad</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>🍦 Amai Gelato</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Tus estilos existentes -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        /* ... todos tus estilos existentes ... */
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .ice-cream-bg {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: #10b981;
+        }
+        
+        .notification.error {
+            background-color: #ef4444;
+        }
+        
+        .notification.warning {
+            background-color: #f59e0b;
+        }
+        
+        .cart-badge {
+            animation: bounce 0.5s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+        
+        .modal-overlay {
+            backdrop-filter: blur(5px);
+        }
+        
+        .stock-warning {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            color: white;
+            font-weight: bold;
+            animation: warning-pulse 1.5s infinite;
+        }
+        
+        @keyframes warning-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .out-of-stock {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-      <!-- Notification Container -->
+    <!-- Notification Container -->
     <div id="notification-container"></div>
 
     <!-- Loading Overlay -->
@@ -370,43 +472,8 @@
         </div>
     </div>
 
-
-    <!-- Loading indicator -->
-    <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg flex items-center space-x-3">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span>Cargando...</span>
-        </div>
-    </div>
-
-    <!-- Error message -->
-    <div id="error-message" class="hidden fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
-        <div class="flex items-center space-x-2">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="error-text">Error de conexión</span>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="{{ asset('js/cart-integration.js') }}"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
     <script src="{{ asset('js/frontend.js') }}"></script>
-    <script>
-        // Función para mostrar notificaciones
-        function showNotification(message, type = 'success') {
-            // Tu implementación existente de notificaciones
-            console.log(`${type.toUpperCase()}: ${message}`);
-        }
-
-        // Función para mostrar/ocultar loading
-        function showLoading(show) {
-            const loadingElement = document.getElementById('loading');
-            if (show) {
-                loadingElement.classList.remove('hidden');
-            } else {
-                loadingElement.classList.add('hidden');
-            }
-        }
-    </script>
+    <script src="{{ asset('js/script.js') }}"></script>
+    <script src="{{ asset('js/cart-integration.js') }}"></script>
 </body>
 </html>

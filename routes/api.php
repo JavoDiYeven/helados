@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VentaController;
-use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +18,9 @@ Route::post('/register', [AuthController::class, 'register']);
 
 // Productos públicos para el catálogo
 Route::get('/productos', [ProductoController::class, 'apiIndex']);
+
+// VENTAS SIN AUTENTICACIÓN (como invitado)
+Route::post('/ventas', [VentaController::class, 'store']);
 
 // Estado de la API
 Route::get('/status', function () {
@@ -39,7 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/check', [AuthController::class, 'check']);
     
     // Ventas (usuarios autenticados)
-    Route::post('/ventas', [VentaController::class, 'store']);
     Route::get('/mis-pedidos', [VentaController::class, 'misPedidos']);
     
     // Rutas de administrador

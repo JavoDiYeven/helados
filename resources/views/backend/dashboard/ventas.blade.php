@@ -18,7 +18,7 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
             <div>
-                <a href="{{ route('backend.dashboard') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Volver al Dashboard
                 </a>
             </div>
@@ -42,7 +42,7 @@
         <!-- Filtros -->
         <div class="card mb-4 no-print">
             <div class="card-body">
-                <form method="GET" action="{{ route('backend.dashboard.ventas') }}" class="row g-3">
+                <form method="GET" action="{{ route('admin.reporte-ventas') }}" class="row g-3">
                     <div class="col-md-4">
                         <label for="mes" class="form-label">Mes</label>
                         <select name="mes" id="mes" class="form-select">

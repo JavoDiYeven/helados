@@ -13,7 +13,7 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <a href="{{ route('backend.dashboard') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Volver al Dashboard
                 </a>
             </div>

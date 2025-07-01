@@ -155,11 +155,11 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow">
                             <div class="dropdown-header">Opciones de Reporte:</div>
-                            <a class="dropdown-item" href="{{ route('backend.dashboard.ventas') }}">
+                            <a class="dropdown-item" href="{{ route('admin.reporte-ventas') }}">
                                 <i class="fas fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Ver Reporte Completo
                             </a>
-                            <a class="dropdown-item" href="{{ route('backend.dashboard.ventas', ['mes' => now()->subMonth()->month]) }}">
+                            <a class="dropdown-item" href="{{ route('admin.reporte-ventas', ['mes' => now()->subMonth()->month]) }}">
                                 <i class="fas fa-calendar fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Mes Anterior
                             </a>
@@ -286,7 +286,7 @@
                         </table>
                     </div>
                     <div class="text-center mt-3">
-                        <a href="{{ route('backend.dashboard.productos') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.reporte-productos') }}" class="btn btn-primary">
                             <i class="fas fa-chart-bar"></i> Ver Reporte Completo
                         </a>
                     </div>
@@ -348,13 +348,13 @@
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <a href="{{ route('backend.dashboard.ventas') }}" class="btn btn-info btn-lg w-100">
+                            <a href="{{ route('admin.reporte-ventas') }}" class="btn btn-info btn-lg w-100">
                                 <i class="fas fa-chart-line"></i><br>
                                 <small>Reporte de Ventas</small>
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <a href="{{ route('backend.dashboard.productos') }}" class="btn btn-warning btn-lg w-100">
+                            <a href="{{ route('admin.reporte-productos') }}" class="btn btn-warning btn-lg w-100">
                                 <i class="fas fa-ice-cream"></i><br>
                                 <small>Análisis de Productos</small>
                             </a>

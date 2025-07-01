@@ -8,6 +8,7 @@ use App\Models\Venta;
 use App\Models\DetalleVenta;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -76,7 +77,7 @@ class DashboardController extends Controller
             ));
 
         } catch (\Exception $e) {
-            \Log::error('Error en dashboard: ' . $e->getMessage());
+            Log::error('Error en dashboard: ' . $e->getMessage());
             
             // Datos por defecto en caso de error
             return view('backend.dashboard.index', [
@@ -115,7 +116,7 @@ class DashboardController extends Controller
             'ticket_promedio' => $ventas->count() > 0 ? $ventas->sum('total') / $ventas->count() : 0
         ];
 
-        return view('backend.dashboard.reporte-ventas', compact('ventas', 'resumen', 'mes', 'año'));
+        return view('backend.dashboard.ventas', compact('ventas', 'resumen', 'mes', 'año'));
     }
 
     /**
@@ -136,7 +137,7 @@ class DashboardController extends Controller
             ->orderBy('total_vendido', 'desc')
             ->get();
 
-        return view('backend.dashboard.reporte-productos', compact('productosReporte'));
+        return view('backend.dashboard.productos', compact('productosReporte'));
     }
 
     /**

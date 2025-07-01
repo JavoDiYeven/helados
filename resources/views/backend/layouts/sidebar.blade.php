@@ -16,7 +16,7 @@
             <!-- Dashboard -->
             <li class="nav-item">
                 <a class="nav-link text-white {{ request()->routeIs('dashboard') ? 'active' : '' }}" 
-                   href="{{ route('backend.dashboard') }}">
+                   href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-tachometer-alt me-2"></i>
                     <span>Dashboard</span>
                 </a>
@@ -51,14 +51,14 @@
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
                             <a class="nav-link text-white-75 {{ request()->routeIs('dashboard.reporte-ventas') ? 'active' : '' }}" 
-                               href="{{ route('backend.dashboard.ventas') }}">
+                               href="{{ route('admin.reporte-ventas') }}">
                                 <i class="fas fa-chart-bar me-2"></i>
                                 <span>Ventas</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white-75 {{ request()->routeIs('dashboard.reporte-productos') ? 'active' : '' }}" 
-                               href="{{ route('backend.dashboard.productos') }}">
+                               href="{{ route('admin.reporte-productos') }}">
                                 <i class="fas fa-ice-cream me-2"></i>
                                 <span>Productos</span>
                             </a>

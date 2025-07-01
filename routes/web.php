@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VentaController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +22,7 @@ Route::get('/tienda', function () {
     return view('welcome');
 })->name('tienda');
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login.page');
+Route::get('/login', [AuthController::class, 'showLoginPage'])->name('login');
 
 // Rutas del Backend Dashboard (requieren autenticación web)
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -50,8 +49,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard/reporte-ventas', [DashboardController::class, 'reporteVentas'])->name('dashboard.reporte-ventas');
 Route::get('/dashboard/reporte-productos', [DashboardController::class, 'reporteProductos'])->name('dashboard.reporte-productos');
-Route::resource('productos', ProductoController::class);
-Route::resource('ventas', VentaController::class)->except(['store']);
+Route::resource('/productos', ProductoController::class);
+Route::resource('/ventas', VentaController::class)->except(['store']);
 
 // Rutas de prueba y utilidad
 Route::get('/test-productos', function () {
