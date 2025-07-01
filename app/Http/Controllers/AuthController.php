@@ -11,41 +11,24 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-     public function login(Request $request){
-        try {
-            $credentials = $request->only('email', 'password');
+    /**
+     * Login de usuario
+     */
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
 
-            if (!Auth::attempt($credentials)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Credenciales incorrectas',
-                ], 401);
-            }
-
-            $user = Auth::user();
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Login exitoso',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role ?? 'cliente'
-                ],
-                'token' => $token
-            ]);
-        } catch (\Exception $e) {
-            //Log::error('Error en login: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error interno del servidor',
-                'error' => $e->getMessage()
-            ], 500);
+        if (!Auth::attempt($credentials)) {
+            return redirect()->back()->withErrors([
+                'email' => 'Credenciales incorrectas']);
         }
+
+        // Regenerar sesión (previene fijación de sesión)
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('backend.dashboard'));
     }
+
 
     /**
      * Registro de usuario
@@ -88,7 +71,7 @@ class AuthController extends Controller
                 'role' => 'cliente'
             ]);
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            //$token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'success' => true,
@@ -114,25 +97,26 @@ class AuthController extends Controller
      * Logout de usuario
      */
     public function logout(Request $request)
-    {
-        try {
-            $token = $request->user()->currentAccessToken();
-            if ($token) {
-                $token->revoke();
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Logout exitoso'
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al cerrar sesión'
-            ], 500);
+{
+    if ($request->expectsJson()) {
+        $token = $request->user()?->currentAccessToken();
+        if ($token) {
+            $token->delete();
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logout exitoso'
+        ]);
     }
+
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login');
+}
+
 
     /**
      * Obtener usuario actual

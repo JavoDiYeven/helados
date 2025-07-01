@@ -161,7 +161,7 @@
         </div>
 
         <!-- Login Form -->
-        <form id="login-form" class="space-y-6">
+        <form method="POST" action="{{ route('backend.login') }}" class="space-y-6">
             <!-- Email Field -->
             <div class="input-group">
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">

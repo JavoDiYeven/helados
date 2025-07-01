@@ -11,14 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('productos', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre');
-            $table->string('imagen')->nullable();
-            $table->text('descripcion')->nullable();
-            $table->int('precio');
-            $table->integer('stock')->default(0);
-            $table->timestamps();
+        Schema::table('productos', function (Blueprint $table) {
+            $table->integer('precio')->change();
         });
     }
 
@@ -28,8 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('productos', function (Blueprint $table) {
-            $table->dropColumn('imagen');
+            $table->decimal('precio', 8, 2)->change();
         });
-
     }
 };

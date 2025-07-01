@@ -24,6 +24,13 @@
         <input type="file" name="imagen" class="form-control" value="{{ $producto->imagen }}" required>
         <label for="descripcion" class="form-label"><strong>Descripción:</strong></label>
         <input type="text" name="descripcion" class="form-control" value="{{ $producto->descripcion }}" required>
+        <label for="categoria" class="form-label"><strong>Categoría:</strong></label>
+        <select name="categoria" class="form-control" required>
+          <option value="" disabled selected>Seleccione una categoría</option>
+          <option value="Cremosos">Cremosos</option>
+          <option value="Frutales">Frutales</option>
+          <option value="Especiales">Especiales</option>
+        </select>
         <label for="precio" class="form-label"><strong>Precio:</strong></label>
         <input type="number" name="precio" class="form-control" value="{{ $producto->precio }}" required>
         <label for="stock" class="form-label"><strong>Stock:</strong></label>

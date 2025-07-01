@@ -21,6 +21,7 @@
                     <th width="80px">COD</th>
                     <th>Nombre</th>
                     <th>Descripción</th>
+                    <th>Categoria</th>
                     <th>Precio</th>
                     <th>Stock</th>
                     <th width="250px">Acciones</th>
@@ -32,6 +33,7 @@
                     <td>{{ $producto->id }}</td>
                     <td>{{ $producto->nombre }}</td>
                     <td>{{ $producto->descripcion }}</td>
+                    <td>{{ $producto->categoria }}</td>
                     <td>{{ $producto->precio }}</td>
                     <td>{{ $producto->stock }}</td>
                     <td>

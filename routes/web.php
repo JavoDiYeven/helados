@@ -17,39 +17,25 @@ Route::get('favicon.ico', function () {
     return response()->noContent();
 });
 
-// Grupo frontend
-Route::middleware([])->post('/ventas', [VentaController::class, 'store']);
+// Authentication Routes
+Route::get('/backend/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/backend/login', [AuthController::class, 'login'])->name('backend.login');
+Route::post('/backend/logout', [AuthController::class, 'logout'])->name('backend.logout');
 
-// Grupo backend
-Route::prefix('backend')->group(function () {
-    // Al acceder a /backend, redirige al login
+// Protected Backend Routes
+Route::prefix('backend')->middleware('auth')->group(function () {
     Route::get('/', function () {
-        return redirect()->route('backend.login');
+        return redirect()->route('backend.dashboard');
     });
-
-    // Login (puedes usar un controlador o una vista directa)
     
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('backend.login');
-    Route::post('/login', [AuthController::class, 'login'])->name('backend.login.submit');
-
-    // Si quieres un logout
-    Route::post('/logout', [AuthController::class, 'logout'])->name('backend.logout');
-
-    // Dashboard y otros, protegidos por middleware auth
-    Route::middleware('auth')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('backend.dashboard');
-
-        Route::get('/dashboard/ventas', [DashboardController::class, 'ventas'])->name('backend.dashboard.ventas');
-        Route::get('/dashboard/productos', [DashboardController::class, 'reporteProductos'])->name('backend.dashboard.productos');
-        Route::get('/dashboard/reporte-ventas', [DashboardController::class, 'reporteVentasMes'])->name('backend.dashboard.ventas');
-        Route::get('/dashboard/reporte-productos', [DashboardController::class, 'reporteProductos'])->name('backend.dashboard.productos');
-        Route::get('/dashboard/notificaciones', [DashboardController::class, 'getNotificaciones']);
-
-        // Admin CRUD
-        Route::resource('productos', ProductoController::class);
-        Route::resource('insumos', InsumoController::class);
-
-        // API exclusiva del admin
-        //Route::post('/api/ventas', [VentaController::class, 'store']);
-    });
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('backend.dashboard');
+    Route::get('/dashboard/notificaciones', [DashboardController::class, 'notificaciones'])->name('backend.dashboard.notificaciones');
+    Route::get('/dashboard/productos', [DashboardController::class, 'productos'])->name('backend.dashboard.productos');
+    Route::get('/dashboard/reporte-productos', [DashboardController::class, 'reporteProductos'])->name('backend.dashboard.reporte-productos');
+    Route::get('/dashboard/reporte-ventas', [DashboardController::class, 'reporteVentas'])->name('backend.dashboard.reporte-ventas');
+    Route::get('/dashboard/ventas', [DashboardController::class, 'ventas'])->name('backend.dashboard.ventas');
+    
+    // Resource routes
+    Route::resource('productos', ProductoController::class);
+    Route::resource('insumos', InsumoController::class);
 });

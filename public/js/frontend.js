@@ -149,7 +149,7 @@ function displayProducts(productsToShow) {
                     <p class="text-gray-600 mb-4 text-sm">${product.descripcion}</p>
                     
                     <div class="flex items-center justify-between mb-4">
-                        <span class="text-2xl font-bold text-green-600">$${Number.parseFloat(product.precio).toFixed(2)}</span>
+                        <span class="text-2xl font-bold text-green-600">$${new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.precio)}</span>
                         <div class="text-sm text-gray-500">
                             <i class="fas fa-box mr-1"></i>
                             Stock: ${product.stock}
