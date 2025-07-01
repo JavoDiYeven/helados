@@ -4,13 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\VentaController;
-use App\Http\Controllers\AuthController; // Asegúrate de tener este controlador
+use App\Http\Controllers\AuthController;
+use App\Http\Middleware\Authenticate;
 
 // Página inicial
 Route::get('/', function () {
     return view('welcome');
 });
+Route::resource('productos', ProductoController::class);
 
 //Prevencion del favicon
 Route::get('favicon.ico', function () {
@@ -18,12 +19,17 @@ Route::get('favicon.ico', function () {
 });
 
 // Authentication Routes
-Route::get('/backend/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/backend/login', [AuthController::class, 'login'])->name('backend.login');
-Route::post('/backend/logout', [AuthController::class, 'logout'])->name('backend.logout');
+
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 // Protected Backend Routes
-Route::prefix('backend')->middleware('auth')->group(function () {
+Route::prefix('backend')->middleware('auth', Authenticate::class)->group(function () {
     Route::get('/', function () {
         return redirect()->route('backend.dashboard');
     });

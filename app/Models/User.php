@@ -46,8 +46,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
     }
+
+     protected $dates = ['deleted_at'];
+
+    // Roles del sistema
+    const ROLE_ADMIN = 'admin';
+    const ROLE_MANAGER = 'manager';
+    const ROLE_EMPLOYEE = 'employee';
+    const ROLE_CUSTOMER = 'customer';
+
     //verifica si el usuario es administrador
     protected function isAdmin(){
         return $this->role === 'admin';
@@ -61,5 +71,19 @@ class User extends Authenticatable
     public function ventas()
     {
         return $this->hasMany(Venta::class, 'user_id');
+    }
+
+    public function canAccessBackend(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_ADMIN, 
+            self::ROLE_MANAGER, 
+            self::ROLE_EMPLOYEE
+        ]) && $this->is_active;
+    }
+
+    public function updateLastLogin(): void
+    {
+        $this->update(['last_login_at' => now()]);
     }
 }

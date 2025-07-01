@@ -161,7 +161,8 @@
         </div>
 
         <!-- Login Form -->
-        <form method="POST" action="{{ route('backend.login') }}" class="space-y-6">
+        <form method="POST" action="{{ route('login') }}" class="space-y-6">
+            @csrf
             <!-- Email Field -->
             <div class="input-group">
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
@@ -398,6 +399,6 @@
         </div>
     </div>
 
-    <script src="/js/login.js"></script>
+   <script src="/js/></script>
 </body>
 </html>

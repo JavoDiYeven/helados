@@ -2,163 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+use App\Http\Requests\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use App\Models\User;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * Login de usuario
-     */
-    public function login(Request $request)
+    public function __construct()
     {
-        $credentials = $request->only('email', 'password');
-
-        if (!Auth::attempt($credentials)) {
-            return redirect()->back()->withErrors([
-                'email' => 'Credenciales incorrectas']);
-        }
-
-        // Regenerar sesión (previene fijación de sesión)
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('backend.dashboard'));
-    }
-
-
-    /**
-     * Registro de usuario
-     */
-    public function register(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nombre' => 'required|string|max:255',
-                'apellido' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'telefono' => 'required|string|max:20',
-                'password' => 'required|min:6|confirmed'
-            ], [
-                'nombre.required' => 'El nombre es obligatorio',
-                'apellido.required' => 'El apellido es obligatorio',
-                'email.required' => 'El email es obligatorio',
-                'email.email' => 'El email debe ser válido',
-                'email.unique' => 'Este email ya está registrado',
-                'telefono.required' => 'El teléfono es obligatorio',
-                'password.required' => 'La contraseña es obligatoria',
-                'password.min' => 'La contraseña debe tener al menos 6 caracteres',
-                'password.confirmed' => 'Las contraseñas no coinciden'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Datos inválidos',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-
-            $user = User::create([
-                'name' => $request->nombre . ' ' . $request->apellido,
-                'email' => $request->email,
-                'telefono' => $request->telefono,
-                'password' => Hash::make($request->password),
-                'role' => 'cliente'
-            ]);
-
-            //$token = $user->createToken('auth_token')->plainTextToken;
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Usuario registrado exitosamente',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role
-                ],
-                'token' => $token
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al registrar usuario'
-            ], 500);
-        }
-    }
-
-    /**
-     * Logout de usuario
-     */
-    public function logout(Request $request)
-{
-    if ($request->expectsJson()) {
-        $token = $request->user()?->currentAccessToken();
-        if ($token) {
-            $token->delete();
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout exitoso'
-        ]);
-    }
-
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    return redirect()->route('login');
-}
-
-
-    /**
-     * Obtener usuario actual
-     */
-    public function me(Request $request)
-    {
-        try {
-            $user = $request->user();
-
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'telefono' => $user->telefono,
-                    'role' => $user->role ?? 'cliente'
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener usuario'
-            ], 500);
-        }
-    }
-
-    //Verificar si el usuario está autenticado
-     
-    public function check(Request $request)
-    {
-        return response()->json([
-            'success' => true,
-            'authenticated' => $request->user() ? true : false,
-            'user' => $request->user() ? [
-                'id' => $request->user()->id,
-                'name' => $request->user()->name,
-                'email' => $request->user()->email,
-                'role' => $request->user()->role ?? 'cliente'
-            ] : null
-        ]);
+        $this->middleware('guest')->except('logout');
+        $this->middleware('auth')->only('logout');
     }
 
     public function showLoginForm()
@@ -166,28 +23,69 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function delete(Request $request)
+    public function login(Request $request)
     {
-        try {
-            $user = $request->user();
-            if ($user) {
-                $user->delete();
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Usuario eliminado exitosamente'
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario no encontrado'
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al eliminar usuario',
-                'error' => $e->getMessage()
-            ], 500);
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            // Llamada manual al método authenticated()
+            return $this->authenticated($request, Auth::user());
         }
+
+        return back()->withErrors([
+            'email' => 'Credenciales inválidas.',
+        ]);
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // Log del login exitoso
+        logger()->info('Usuario autenticado', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            
+        ]);
+
+        return redirect()->intended('/backend/dashboard');
+    }
+
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Log del logout
+        logger()->info('Usuario cerró sesión', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
+
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login')->with('message', 'Sesión cerrada correctamente.');
+    }
+
+    protected function checkTooManyFailedAttempts(Request $request)
+    {
+        if (RateLimiter::tooManyAttempts($this->throttleKey($request), 5)) {
+            $seconds = RateLimiter::availableIn($this->throttleKey($request));
+            
+            throw ValidationException::withMessages([
+                'email' => ["Demasiados intentos fallidos. Intenta de nuevo en {$seconds} segundos."],
+            ]);
+        }
+    }
+
+    protected function throttleKey(Request $request): string
+    {
+        return Str::transliterate(
+            Str::lower($request->input('email')).'|'.$request->ip()
+        );
     }
 }
