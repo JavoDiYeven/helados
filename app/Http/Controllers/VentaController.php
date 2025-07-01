@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Producto;
+use App\Models\Venta;
+use App\Models\DetalleVenta;
 
 class VentaController extends Controller
 {
     public function store(Request $request)
     {
         $request->validate([
-            'numero_pedido' => 'required|unique:ventas',
+            'numero_pedido' => 'required|string|max:255',
             'cliente_nombre' => 'required|string|max:255',
             'cliente_telefono' => 'required|string|max:20',
             'cliente_email' => 'nullable|email',
@@ -52,7 +56,7 @@ class VentaController extends Controller
                 }
 
                 // Crear detalle de venta
-                VentaDetalle::create([
+                DetalleVenta::create([
                     'venta_id' => $venta->id,
                     'producto_id' => $producto->id,
                     'producto_nombre' => $producto->nombre,

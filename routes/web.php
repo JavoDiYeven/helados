@@ -17,12 +17,8 @@ Route::get('favicon.ico', function () {
     return response()->noContent();
 });
 
-// API para el frontend (público)
-Route::get('api/productos', [ProductoController::class, 'apiIndex']);
-Route::post('api/ventas', [VentaController::class, 'store']);
-
-// CRUD productos (si es accesible fuera del admin)
-Route::resource('productos', ProductoController::class);
+// Grupo frontend
+Route::middleware([])->post('/ventas', [VentaController::class, 'store']);
 
 // Grupo backend
 Route::prefix('backend')->group(function () {
@@ -32,6 +28,7 @@ Route::prefix('backend')->group(function () {
     });
 
     // Login (puedes usar un controlador o una vista directa)
+    
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('backend.login');
     Route::post('/login', [AuthController::class, 'login'])->name('backend.login.submit');
 
@@ -53,6 +50,6 @@ Route::prefix('backend')->group(function () {
         Route::resource('insumos', InsumoController::class);
 
         // API exclusiva del admin
-        Route::post('/api/ventas', [VentaController::class, 'store']);
+        //Route::post('/api/ventas', [VentaController::class, 'store']);
     });
 });

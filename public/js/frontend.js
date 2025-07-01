@@ -1,5 +1,6 @@
 // Configuración de la API
-const API_BASE_URL = "http://localhost:8000" // Cambia esto por la URL de tu API Laravel
+const API_BASE_URL = "http://localhost:8000" 
+const csrfToken = getCookie("XSRF-TOKEN")
 let products = []
 let cart = []
 let orderData = {}
@@ -14,6 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("cart-btn").addEventListener("click", openCart)
   document.getElementById("delivery-form").addEventListener("submit", handleOrderSubmit)
 })
+
+// Esta función permite leer cookies
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+  if (match) return decodeURIComponent(match[2])
+  return null
+}
+
 
 // Función para mostrar notificaciones
 function showNotification(message, type = "success") {
@@ -457,7 +466,7 @@ async function enviarVentaAlBackend(orderData) {
       total: orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0) + 25,
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/ventas`, {
+    const response = await fetch('http://localhost:8000/api/ventas', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

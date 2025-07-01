@@ -18,7 +18,7 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
             <div>
-                <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('backend.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Volver al Dashboard
                 </a>
             </div>
@@ -42,7 +42,7 @@
         <!-- Filtros -->
         <div class="card mb-4 no-print">
             <div class="card-body">
-                <form method="GET" action="{{ route('dashboard.reporte-ventas') }}" class="row g-3">
+                <form method="GET" action="{{ route('backend.dashboard.ventas') }}" class="row g-3">
                     <div class="col-md-4">
                         <label for="mes" class="form-label">Mes</label>
                         <select name="mes" id="mes" class="form-select">
@@ -165,7 +165,7 @@
 
         <!-- Footer del Reporte -->
         <div class="text-center mt-4 text-muted">
-            <p>Reporte generado automáticamente por el sistema de Helados Delicia</p>
+            <p>Reporte generado automáticamente por el sistema de Amai Gelato</p>
             <p>{{ now()->format('d/m/Y H:i:s') }}</p>
         </div>
     </div>

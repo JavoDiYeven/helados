@@ -37,7 +37,7 @@ class AuthController extends Controller
                 'token' => $token
             ]);
         } catch (\Exception $e) {
-            Log::error('Error en login: ' . $e->getMessage());
+            //Log::error('Error en login: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -78,12 +78,6 @@ class AuthController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            if (!Auth::attempt($credentials)) {
-                return response()->json([
-                'success' => false,
-                'message' => 'Credenciales incorrectas'
-                ], 401);
-            }
 
 
             $user = User::create([
@@ -122,7 +116,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            $request->user()->currentAccessToken()->delete();
+            $token = $request->user()->currentAccessToken();
+            if ($token) {
+                $token->revoke();
+            }
 
             return response()->json([
                 'success' => true,
@@ -183,5 +180,30 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         return view('auth.login');
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if ($user) {
+                $user->delete();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Usuario eliminado exitosamente'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar usuario',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

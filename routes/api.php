@@ -12,7 +12,7 @@ use App\Http\Controllers\VentaController;
 |--------------------------------------------------------------------------
 */
 
-// 📌 Rutas públicas (no requieren autenticación)
+// Rutas públicas (no requieren autenticación)
 Route::get('/status', function () {
     return response()->json([
         'success' => true,
@@ -20,6 +20,9 @@ Route::get('/status', function () {
         'timestamp' => now(),
     ]);
 });
+Route::middleware([])->post('/ventas', [VentaController::class, 'store']);
+Route::post('/ventas', [VentaController::class, 'store']);
+Route::get('/mis-pedidos', [VentaController::class, 'misPedidos']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,10 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/check', [AuthController::class, 'check']);
-
-    // Ventas usuario
-    Route::post('/ventas', [VentaController::class, 'store']);
-    Route::get('/mis-pedidos', [VentaController::class, 'misPedidos']);
 
     // Admin
     Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
