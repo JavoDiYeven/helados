@@ -1,6 +1,6 @@
 // Configuración
-const API_BASE_URL = "http://127.0.0.1:8000" // Cambia por tu URL de Laravel
-const REDIRECT_URL = "/backend/dashboard" // Página principal después del login
+const API_BASE_URL = "http://localhost:8000" // Cambia por tu URL de Laravel
+const REDIRECT_URL = "index.html" // Página principal después del login
 
 // Usuarios demo (en producción esto vendría de la base de datos)
 const DEMO_USERS = {
@@ -102,11 +102,13 @@ async function handleLogin(e) {
     if (loginResult.success) {
       // Guardar sesión
       saveUserSession(loginResult.user, remember)
-      localStorage.setItem("auth_token", loginResult.token)
-      showNotification(`¡Bienvenido ${loginResult.user.name}!`, "success");
+
+      showNotification(`¡Bienvenido ${loginResult.user.name}!`, "success")
+
+      // Redirigir después de un breve delay
       setTimeout(() => {
-        redirectToMain();
-      }, 1500);
+        redirectToMain()
+      }, 1500)
     } else {
       showNotification(loginResult.message, "error")
     }
@@ -120,41 +122,46 @@ async function handleLogin(e) {
 
 // Función para autenticar usuario (simulada)
 async function authenticateUser(email, password) {
-  try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-    const response = await fetch(`${API_BASE_URL}/backend/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken })
-      },
-      body: JSON.stringify({ email, password })
+  // En producción, esto sería una llamada a tu API Laravel
+  /*
+    const response = await fetch(`${API_BASE_URL}/api/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
     });
+    
+    return await response.json();
+    */
 
-    const data = await response.json();
+  // Simulación para demo
+  const user = DEMO_USERS[email]
 
-    if (!response.ok) {
-      return {
-        success: false,
-        message: data.message || 'Error al iniciar sesión',
-        errors: data.errors || null
-      };
-    }
-
-    return {
-      success: true,
-      user: data.user,
-      token: data.token
-    };
-
-  } catch (error) {
-    console.error("Error en la autenticación:", error);
+  if (!user) {
     return {
       success: false,
-      message: "Error de red o del servidor"
-    };
+      message: "Usuario no encontrado",
+    }
+  }
+
+  if (user.password !== password) {
+    return {
+      success: false,
+      message: "Contraseña incorrecta",
+    }
+  }
+
+  return {
+    success: true,
+    user: {
+      id: user.id,
+      email: email,
+      name: user.name,
+      role: user.role,
+    },
+    token: "demo_token_" + Date.now(),
   }
 }
 
@@ -342,7 +349,7 @@ function closeRegisterModal() {
 // Función para llenar credenciales demo
 function fillDemoCredentials(type) {
   if (type === "admin") {
-    document.getElementById("email").value = "admin@amaigelato.com"
+    document.getElementById("email").value = "admin@heladosdelicia.com"
     document.getElementById("password").value = "admin123"
   } else if (type === "cliente") {
     document.getElementById("email").value = "cliente@test.com"

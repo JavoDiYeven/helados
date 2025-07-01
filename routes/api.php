@@ -2,42 +2,50 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VentaController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes (Sin CSRF Token)
 |--------------------------------------------------------------------------
 */
 
-// Rutas públicas (no requieren autenticación)
+// Rutas públicas (sin autenticación)
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+// Productos públicos para el catálogo
+Route::get('/productos', [ProductoController::class, 'apiIndex']);
+
+// Estado de la API
 Route::get('/status', function () {
     return response()->json([
         'success' => true,
         'message' => 'API funcionando correctamente',
         'timestamp' => now(),
+        'csrf_required' => false
     ]);
 });
-Route::middleware([])->post('/ventas', [VentaController::class, 'store']);
-Route::post('/ventas', [VentaController::class, 'store']);
-Route::get('/mis-pedidos', [VentaController::class, 'misPedidos']);
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::get('/productos', [ProductoController::class, 'apiIndex']);
-
-// Rutas protegidas (requieren autenticación)
+// Rutas protegidas con Sanctum
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth
+    
+    // Autenticación
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/check', [AuthController::class, 'check']);
-
-    // Admin
-    Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
-        Route::get('/ventas', [VentaController::class, 'index']);
-        Route::get('/dashboard', [VentaController::class, 'dashboard']);
+    
+    // Ventas (usuarios autenticados)
+    Route::post('/ventas', [VentaController::class, 'store']);
+    Route::get('/mis-pedidos', [VentaController::class, 'misPedidos']);
+    
+    // Rutas de administrador
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/ventas', [VentaController::class, 'adminIndex']);
+        Route::get('/admin/dashboard', [DashboardController::class, 'apiStats']);
+        Route::get('/admin/productos', [ProductoController::class, 'adminIndex']);
     });
 });

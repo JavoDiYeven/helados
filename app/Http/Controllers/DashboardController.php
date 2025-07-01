@@ -2,104 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    /**
+     * Dashboard principal
+     */
     public function index()
     {
-        // Datos generales
-        $ventasDelMes = Venta::delMes()->count();
-        $ingresosMes = Venta::delMes()->entregadas()->sum('total');
-        $productosVendidosMes = DetalleVenta::whereHas('venta', function($query) {
-            $query->delMes()->entregadas();
-        })->sum('cantidad');
+        try {
+            // Estadísticas básicas
+            $ventasDelMes = Venta::whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
+                                ->count();
 
-        // Productos con stock bajo (≤ 10)
-        $productosStockBajo = Producto::where('stock', '<=', 10)->where('stock', '>', 0)->get();
-        $productosSinStock = Producto::where('stock', 0)->get();
+            $ingresosMes = Venta::whereMonth('created_at', now()->month)
+                               ->whereYear('created_at', now()->year)
+                               ->sum('total');
 
-        // Gráfico de ventas del mes (por días)
-        $ventasPorDia = $this->getVentasPorDia();
+            $productosVendidosMes = DetalleVenta::whereHas('venta', function($query) {
+                                        $query->whereMonth('created_at', now()->month)
+                                              ->whereYear('created_at', now()->year);
+                                    })->sum('cantidad');
 
-        // Top 10 productos más vendidos
-        $topProductos = $this->getTopProductos();
+            // Productos con alertas de stock
+            $productosStockBajo = Producto::where('stock', '<=', 10)
+                                        ->where('stock', '>', 0)
+                                        ->get();
 
-        // Ventas recientes
-        $ventasRecientes = Venta::with('detalles')
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
+            $productosSinStock = Producto::where('stock', 0)->get();
 
-        return view('backend.dashboard.index', compact(
-            'ventasDelMes',
-            'ingresosMes',
-            'productosVendidosMes',
-            'productosStockBajo',
-            'productosSinStock',
-            'ventasPorDia',
-            'topProductos',
-            'ventasRecientes'
-        ));
-    }
+            // Top productos más vendidos
+            $topProductos = DB::table('venta_detalles')
+                ->join('productos', 'venta_detalles.producto_id', '=', 'productos.id')
+                ->join('ventas', 'venta_detalles.venta_id', '=', 'ventas.id')
+                ->whereMonth('ventas.created_at', now()->month)
+                ->whereYear('ventas.created_at', now()->year)
+                ->select(
+                    'productos.id as producto_id',
+                    'productos.nombre as producto_nombre',
+                    DB::raw('SUM(venta_detalles.cantidad) as total_vendido'),
+                    DB::raw('SUM(venta_detalles.cantidad * venta_detalles.precio_unitario) as total_ingresos')
+                )
+                ->groupBy('productos.id', 'productos.nombre')
+                ->orderBy('total_vendido', 'desc')
+                ->limit(10)
+                ->get();
 
-    private function getVentasPorDia()
-    {
-        $inicioMes = now()->startOfMonth();
-        $finMes = now()->endOfMonth();
-        
-        $ventas = Venta::selectRaw('DATE(fecha_venta) as fecha, COUNT(*) as total_ventas, SUM(total) as total_ingresos')
-            ->whereBetween('fecha_venta', [$inicioMes, $finMes])
-            ->where('estado', 'entregado')
-            ->groupBy('fecha')
-            ->orderBy('fecha')
-            ->get();
+            // Ventas recientes
+            $ventasRecientes = Venta::with('detalles')
+                                   ->orderBy('created_at', 'desc')
+                                   ->limit(5)
+                                   ->get();
 
-        // Llenar días sin ventas con 0
-        $diasDelMes = [];
-        $ingresosDelMes = [];
-        
-        for ($dia = 1; $dia <= now()->daysInMonth; $dia++) {
-            $fecha = now()->startOfMonth()->addDays($dia - 1)->format('Y-m-d');
-            $ventaDelDia = $ventas->firstWhere('fecha', $fecha);
+            // Datos para gráfico
+            $ventasPorDia = $this->getVentasPorDia();
+
+            return view('backend.dashboard.index', compact(
+                'ventasDelMes',
+                'ingresosMes', 
+                'productosVendidosMes',
+                'productosStockBajo',
+                'productosSinStock',
+                'topProductos',
+                'ventasRecientes',
+                'ventasPorDia'
+            ));
+
+        } catch (\Exception $e) {
+            \Log::error('Error en dashboard: ' . $e->getMessage());
             
-            $diasDelMes[] = $dia;
-            $ingresosDelMes[] = $ventaDelDia ? $ventaDelDia->total_ingresos : 0;
+            // Datos por defecto en caso de error
+            return view('backend.dashboard.index', [
+                'ventasDelMes' => 0,
+                'ingresosMes' => 0,
+                'productosVendidosMes' => 0,
+                'productosStockBajo' => collect(),
+                'productosSinStock' => collect(),
+                'topProductos' => collect(),
+                'ventasRecientes' => collect(),
+                'ventasPorDia' => ['dias' => [], 'ingresos' => []]
+            ]);
         }
-
-        return [
-            'dias' => $diasDelMes,
-            'ingresos' => $ingresosDelMes
-        ];
     }
 
-    private function getTopProductos()
-    {
-        return DetalleVenta::select('producto_nombre', DB::raw('SUM(cantidad) as total_vendido'), DB::raw('SUM(subtotal) as total_ingresos'))
-            ->whereHas('venta', function($query) {
-                $query->where('estado', 'entregado');
-            })
-            ->groupBy('producto_id', 'producto_nombre')
-            ->orderBy('total_vendido', 'desc')
-            ->limit(10)
-            ->get();
-    }
-
-    public function reporteVentasMes(Request $request)
+    /**
+     * Reporte de ventas
+     */
+    public function reporteVentas(Request $request)
     {
         $mes = $request->get('mes', now()->month);
         $año = $request->get('año', now()->year);
-        
+
         $ventas = Venta::with('detalles')
-            ->delMes($mes, $año)
-            ->entregadas()
-            ->orderBy('fecha_venta', 'desc')
-            ->get();
+                      ->whereMonth('created_at', $mes)
+                      ->whereYear('created_at', $año)
+                      ->orderBy('created_at', 'desc')
+                      ->get();
 
         $resumen = [
             'total_ventas' => $ventas->count(),
@@ -107,41 +112,87 @@ class DashboardController extends Controller
             'total_productos_vendidos' => $ventas->sum(function($venta) {
                 return $venta->detalles->sum('cantidad');
             }),
-            'ticket_promedio' => $ventas->count() > 0 ? $ventas->avg('total') : 0
+            'ticket_promedio' => $ventas->count() > 0 ? $ventas->sum('total') / $ventas->count() : 0
         ];
 
-        return view('backend.dashboard.ventas', compact('ventas', 'resumen', 'mes', 'año'));
+        return view('backend.dashboard.reporte-ventas', compact('ventas', 'resumen', 'mes', 'año'));
     }
 
+    /**
+     * Reporte de productos
+     */
     public function reporteProductos()
     {
-        $productosReporte = DetalleVenta::select(
-                'producto_id',
-                'producto_nombre',
-                DB::raw('SUM(cantidad) as total_vendido'),
-                DB::raw('SUM(subtotal) as total_ingresos'),
-                DB::raw('AVG(precio_unitario) as precio_promedio')
+        $productosReporte = DB::table('venta_detalles')
+            ->join('productos', 'venta_detalles.producto_id', '=', 'productos.id')
+            ->select(
+                'productos.id as producto_id',
+                'productos.nombre as producto_nombre',
+                DB::raw('SUM(venta_detalles.cantidad) as total_vendido'),
+                DB::raw('AVG(venta_detalles.precio_unitario) as precio_promedio'),
+                DB::raw('SUM(venta_detalles.cantidad * venta_detalles.precio_unitario) as total_ingresos')
             )
-            ->whereHas('venta', function($query) {
-                $query->where('estado', 'entregado');
-            })
-            ->groupBy('producto_id', 'producto_nombre')
-            ->orderBy('total_ingresos', 'desc')
+            ->groupBy('productos.id', 'productos.nombre')
+            ->orderBy('total_vendido', 'desc')
             ->get();
 
-        return view('backend.dashboard.productos', compact('productosReporte'));
+        return view('backend.dashboard.reporte-productos', compact('productosReporte'));
     }
 
+    /**
+     * Notificaciones AJAX
+     */
     public function getNotificaciones()
     {
-        $productosStockBajo = Producto::where('stock', '<=', 10)->where('stock', '>', 0)->count();
-        $productosSinStock = Producto::where('stock', 0)->count();
+        $stockBajo = Producto::where('stock', '<=', 10)->where('stock', '>', 0)->count();
+        $sinStock = Producto::where('stock', 0)->count();
         $ventasPendientes = Venta::where('estado', 'pendiente')->count();
 
         return response()->json([
-            'stock_bajo' => $productosStockBajo,
-            'sin_stock' => $productosSinStock,
-            'ventas_pendientes' => $ventasPendientes
+            'success' => true,
+            'stock_bajo' => $stockBajo,
+            'sin_stock' => $sinStock,
+            'ventas_pendientes' => $ventasPendientes,
+            'stock_alerts' => $stockBajo + $sinStock
         ]);
+    }
+
+    /**
+     * API Stats para administradores
+     */
+    public function apiStats()
+    {
+        return response()->json([
+            'success' => true,
+            'stats' => [
+                'ventas_mes' => Venta::whereMonth('created_at', now()->month)->count(),
+                'ingresos_mes' => Venta::whereMonth('created_at', now()->month)->sum('total'),
+                'productos_total' => Producto::count(),
+                'stock_bajo' => Producto::where('stock', '<=', 10)->count()
+            ]
+        ]);
+    }
+
+    /**
+     * Obtener ventas por día del mes actual
+     */
+    private function getVentasPorDia()
+    {
+        $diasDelMes = now()->daysInMonth;
+        $dias = [];
+        $ingresos = [];
+
+        for ($i = 1; $i <= $diasDelMes; $i++) {
+            $fecha = Carbon::create(now()->year, now()->month, $i);
+            $dias[] = $i;
+            
+            $ingresosDia = Venta::whereDate('created_at', $fecha)->sum('total');
+            $ingresos[] = (float) $ingresosDia;
+        }
+
+        return [
+            'dias' => $dias,
+            'ingresos' => $ingresos
+        ];
     }
 }

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>🍦 Amai Gelato - Iniciar Sesión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -156,13 +155,12 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <div class="text-6xl mb-4">🍦</div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Helados Delicia</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Amai Gelato</h1>
             <p class="text-gray-600">Inicia sesión para continuar</p>
         </div>
 
         <!-- Login Form -->
-        <form method="POST" action="{{ route('login') }}" class="space-y-6">
-            @csrf
+        <form id="login-form" class="space-y-6">
             <!-- Email Field -->
             <div class="input-group">
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
@@ -254,7 +252,7 @@
             </button>
         </div>
 
-        {{-- <!-- Demo Credentials -->
+        <!-- Demo Credentials -->
         <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <h4 class="text-sm font-semibold text-yellow-800 mb-2">
                 <i class="fas fa-info-circle mr-1"></i>
@@ -277,7 +275,7 @@
                 Usar Cliente
             </button>
         </div>
-    </div> --}}
+    </div>
 
     <!-- Register Modal -->
     <div id="register-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
@@ -285,7 +283,7 @@
             <div class="text-center mb-6">
                 <div class="text-4xl mb-2">👤</div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Crear Cuenta</h2>
-                <p class="text-gray-600">Únete a Helados Delicia</p>
+                <p class="text-gray-600">Únete a Amai Gelato</p>
             </div>
 
             <form id="register-form" class="space-y-4">
@@ -399,6 +397,6 @@
         </div>
     </div>
 
-   <script src="/js/></script>
+    <script src="/js/login.js"></script>
 </body>
 </html>

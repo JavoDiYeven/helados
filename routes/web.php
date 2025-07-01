@@ -2,46 +2,71 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductoController;
-use App\Http\Controllers\InsumoController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Middleware\Authenticate;
+use App\Http\Controllers\VentaController;
 
-// Página inicial
+/*
+|--------------------------------------------------------------------------
+| Web Routes (Backend Dashboard)
+|--------------------------------------------------------------------------
+*/
+
+// Ruta raíz - redirige al frontend
 Route::get('/', function () {
     return view('welcome');
-});
-Route::resource('productos', ProductoController::class);
+})->name('home');
 
-//Prevencion del favicon
-Route::get('favicon.ico', function () {
-    return response()->noContent();
-});
+// Rutas del frontend público
+Route::get('/tienda', function () {
+    return view('welcome');
+})->name('tienda');
 
-// Authentication Routes
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login.page');
 
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-
-
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-});
-
-// Protected Backend Routes
-Route::prefix('backend')->middleware('auth', Authenticate::class)->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('backend.dashboard');
-    });
+// Rutas del Backend Dashboard (requieren autenticación web)
+Route::prefix('admin')->name('admin.')->group(function () {
     
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('backend.dashboard');
-    Route::get('/dashboard/notificaciones', [DashboardController::class, 'notificaciones'])->name('backend.dashboard.notificaciones');
-    Route::get('/dashboard/productos', [DashboardController::class, 'productos'])->name('backend.dashboard.productos');
-    Route::get('/dashboard/reporte-productos', [DashboardController::class, 'reporteProductos'])->name('backend.dashboard.reporte-productos');
-    Route::get('/dashboard/reporte-ventas', [DashboardController::class, 'reporteVentas'])->name('backend.dashboard.reporte-ventas');
-    Route::get('/dashboard/ventas', [DashboardController::class, 'ventas'])->name('backend.dashboard.ventas');
+    // Dashboard principal
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
     
-    // Resource routes
+    // Reportes
+    Route::get('/reporte-ventas', [DashboardController::class, 'reporteVentas'])->name('reporte-ventas');
+    Route::get('/reporte-productos', [DashboardController::class, 'reporteProductos'])->name('reporte-productos');
+    
+    // CRUD de Productos
     Route::resource('productos', ProductoController::class);
-    Route::resource('insumos', InsumoController::class);
+    
+    // Gestión de Ventas
+    Route::resource('ventas', VentaController::class)->except(['store']);
+    
+    // Notificaciones AJAX
+    Route::get('/notificaciones', [DashboardController::class, 'getNotificaciones'])->name('notificaciones');
+});
+
+// Rutas de acceso directo al dashboard (compatibilidad)
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard/reporte-ventas', [DashboardController::class, 'reporteVentas'])->name('dashboard.reporte-ventas');
+Route::get('/dashboard/reporte-productos', [DashboardController::class, 'reporteProductos'])->name('dashboard.reporte-productos');
+Route::resource('productos', ProductoController::class);
+Route::resource('ventas', VentaController::class)->except(['store']);
+
+// Rutas de prueba y utilidad
+Route::get('/test-productos', function () {
+    $productos = \App\Models\Producto::all();
+    return response()->json([
+        'total' => $productos->count(),
+        'productos' => $productos->toArray()
+    ]);
+});
+
+Route::get('/test-connection', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Conexión exitosa',
+        'timestamp' => now(),
+        'environment' => app()->environment()
+    ]);
 });

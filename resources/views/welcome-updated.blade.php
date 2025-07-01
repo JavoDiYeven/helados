@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍦 Helados Delicia - La mejor heladería de la ciudad</title>
+    <title>🍦 Amai Gelato - La mejor heladería de la ciudad</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -15,7 +15,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-      <!-- Notification Container -->
+     <!-- Notification Container -->
     <div id="notification-container"></div>
 
     <!-- Loading Overlay -->
@@ -370,7 +370,7 @@
         </div>
     </div>
 
-
+    
     <!-- Loading indicator -->
     <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg flex items-center space-x-3">
@@ -390,7 +390,7 @@
     <!-- Scripts -->
     <script src="{{ asset('js/cart-integration.js') }}"></script>
     <script src="{{ asset('js/script.js') }}"></script>
-    <script src="{{ asset('js/frontend.js') }}"></script>
+    <script src="/js/frontend.js"></script>
     <script>
         // Función para mostrar notificaciones
         function showNotification(message, type = 'success') {
